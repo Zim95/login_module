@@ -1,14 +1,28 @@
-from open_oauth import app_factory, resources
+from flask import Flask
+from flask_restful import Api
+from flask_sqlalchemy import SQLAlchemy
+from config.exceptions import register_error_handler
+from config import settings
+from open_oauth.resources import Ping
+from flask_oauthlib.provider import OAuth2Provider
 
 
-factory = app_factory.create_app()
-app = factory['app']
-api = factory['api']
-oauth = factory['oauth']
-db = factory['db']
+app = Flask(__name__)
+app = register_error_handler(app)
 
 
-api.add_resource(resources.Ping, '/ping')
+# DATABASE CONFIGURATION
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = settings.SQLALCHEMY_TRACK_MODIFICATIONS
+app.config['BUNDLE_ERRORS'] = settings.BUNDLE_ERRORS
+
+
+db = SQLAlchemy(app)
+api = Api(app)
+oauth = OAuth2Provider(app)
+
+
+api.add_resource(Ping, '/ping')
 
 
 if __name__ == "__main__":
